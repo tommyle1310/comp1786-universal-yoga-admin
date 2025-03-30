@@ -1,53 +1,41 @@
 package com.example.universalyogaadmin
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.appcompat.app.AppCompatActivity
+import com.example.universalyogaadmin.DatabaseHelper
 
-class AddInstanceActivity : ComponentActivity() {
+class AddInstanceActivity : AppCompatActivity() {
     private lateinit var dbHelper: DatabaseHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dbHelper = DatabaseHelper(this)
-        setContent {
-            AddInstanceScreen()
-        }
-    }
 
-    @Composable
-    fun AddInstanceScreen() {
-        var date by remember { mutableStateOf("") }
-        var teacher by remember { mutableStateOf("") }
-        var comments by remember { mutableStateOf("") }
+        setContentView(R.layout.activity_add_instance)
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            TextField(value = date, onValueChange = { date = it }, label = { Text("Date") })
-            TextField(value = teacher, onValueChange = { teacher = it }, label = { Text("Teacher") })
-            TextField(value = comments, onValueChange = { comments = it }, label = { Text("Comments (Optional)") })
+        val classId = intent.getIntExtra("classId", 0)
 
-            Button(onClick = {
-                if (date.isNotEmpty() && teacher.isNotEmpty()) {
-                    // Add logic to save the instance
-                    Toast.makeText(this@AddInstanceActivity, "Instance added successfully!", Toast.LENGTH_SHORT).show()
-                    finish() // Close the activity
-                } else {
-                    Toast.makeText(this@AddInstanceActivity, "Please fill all required fields!", Toast.LENGTH_SHORT).show()
-                }
-            }) {
-                Text("Add Instance")
+        // UI components for date, teacher, comments
+        val dateEditText: EditText = findViewById(R.id.date_edit_text)
+        val teacherEditText: EditText = findViewById(R.id.teacher_edit_text)
+        val commentsEditText: EditText = findViewById(R.id.comments_edit_text)
+
+        val addButton: Button = findViewById(R.id.add_button)
+        addButton.setOnClickListener {
+            val date = dateEditText.text.toString()
+            val teacher = teacherEditText.text.toString()
+            val comments = commentsEditText.text.toString()
+
+            if (date.isNotEmpty() && teacher.isNotEmpty()) {
+                dbHelper.addInstance(classId, date, teacher, comments)
+                finish()
+            } else {
+                Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show()
             }
         }
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.universalyogaadmin.ui
+package com.example.universalyogaadmin.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable

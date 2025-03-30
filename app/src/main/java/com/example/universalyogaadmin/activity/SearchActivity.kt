@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.universalyogaadmin.model.YogaClass
 
 class SearchActivity : ComponentActivity() {
     private lateinit var dbHelper: DatabaseHelper
@@ -18,18 +19,18 @@ class SearchActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         dbHelper = DatabaseHelper(this)
         setContent {
-            SearchScreen()
+            SearchScreen(modifier = Modifier, dbHelper = dbHelper) // Truyền cả modifier và dbHelper
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun SearchScreen(modifier: Modifier = Modifier) {
+    fun SearchScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) {
         var searchQuery by remember { mutableStateOf("") }
-        val classes = remember {
-            mutableStateListOf(
-                YogaClass(day = "Monday", time = "10:00", capacity = "20", duration = "60", price = "$10", type = "Flow Yoga", description = "Beginner-friendly"),
-                YogaClass(day = "Tuesday", time = "11:00", capacity = "15", duration = "90", price = "$15", type = "Aerial Yoga", description = "Intermediate level")
-            )
+        val classes = remember { mutableStateListOf<YogaClass>() }
+
+        LaunchedEffect(Unit) {
+            classes.addAll(dbHelper.getAllClasses())
         }
 
         val filteredClasses = classes.filter { it.type.contains(searchQuery, ignoreCase = true) }
@@ -57,6 +58,7 @@ class SearchActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ClassItem(yogaClass: YogaClass) {
         Card(
