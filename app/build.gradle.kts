@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -48,13 +49,18 @@ dependencies {
 
     implementation(libs.androidx.appcompat)
 
+
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx:25.0.0")
+
     // Jetpack Compose dependencies
-    implementation("androidx.compose.ui:ui:1.5.4") // Use the latest stable version
-    implementation("androidx.compose.material3:material3:1.1.2") // Use the latest stable version
-    implementation("androidx.activity:activity-compose:1.8.0") // Use the latest stable version
-    implementation("androidx.compose.ui:ui-tooling-preview:1.5.4") // For preview support
-    implementation("androidx.compose.material3:material3-window-size-class:1.1.2") // For window size classes
-    implementation("androidx.compose.material:material-icons-extended:1.5.4") // For Material Icons
+    implementation("androidx.compose.ui:ui:1.5.4")
+    implementation("androidx.compose.material3:material3:1.1.2")
+    implementation("androidx.activity:activity-compose:1.8.0")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.5.4")
+    implementation("androidx.compose.material3:material3-window-size-class:1.1.2")
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
 
     // Other dependencies
     implementation(libs.androidx.core.ktx)
@@ -65,6 +71,18 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // Retrofit và Gson
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // Testing dependencies
     testImplementation(libs.junit)

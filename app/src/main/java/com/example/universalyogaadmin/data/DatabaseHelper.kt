@@ -6,13 +6,14 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.universalyogaadmin.model.YogaClass
+import com.example.universalyogaadmin.model.ClassInstance // Thêm import này
 
 class DatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_NAME = "yoga_classes.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
         const val TABLE_CLASSES = "classes"
         const val TABLE_INSTANCES = "instances"
         const val COLUMN_INSTANCE_ID = "_id"
@@ -30,15 +31,6 @@ class DatabaseHelper(context: Context) :
         const val COLUMN_DESCRIPTION = "description"
     }
 
-    data class ClassInstance(
-        val id: Int,
-        val classId: Int,
-        val date: String,
-        val teacher: String,
-        val comments: String?
-    )
-
-    // DatabaseHelper.kt
     override fun onCreate(db: SQLiteDatabase) {
         val createTable = ("CREATE TABLE $TABLE_CLASSES (" +
                 "$COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -56,12 +48,19 @@ class DatabaseHelper(context: Context) :
                 "$COLUMN_TEACHER TEXT," +
                 "$COLUMN_COMMENTS TEXT)")
         db.execSQL(createTable)
-        db.execSQL(createInstanceTable) // Execute the query to create the instances table
+        db.execSQL(createInstanceTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_CLASSES")
-        onCreate(db)
+        if (oldVersion < 2) {
+            val createInstanceTable = ("CREATE TABLE $TABLE_INSTANCES (" +
+                    "$COLUMN_INSTANCE_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "$COLUMN_CLASS_ID INTEGER," +
+                    "$COLUMN_DATE TEXT," +
+                    "$COLUMN_TEACHER TEXT," +
+                    "$COLUMN_COMMENTS TEXT)")
+            db.execSQL(createInstanceTable)
+        }
     }
 
     fun addClass(yogaClass: YogaClass) {
@@ -89,6 +88,20 @@ class DatabaseHelper(context: Context) :
         db.close()
     }
 
+    fun updateClass(yogaClass: YogaClass) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_DAY, yogaClass.day)
+            put(COLUMN_TIME, yogaClass.time)
+            put(COLUMN_CAPACITY, yogaClass.capacity)
+            put(COLUMN_DURATION, yogaClass.duration)
+            put(COLUMN_PRICE, yogaClass.price)
+            put(COLUMN_TYPE, yogaClass.type)
+            put(COLUMN_DESCRIPTION, yogaClass.description)
+        }
+        db.update(TABLE_CLASSES, values, "$COLUMN_ID = ?", arrayOf(yogaClass.id.toString()))
+        db.close()
+    }
 
     fun getAllClasses(): List<YogaClass> {
         val classes = mutableListOf<YogaClass>()
@@ -112,6 +125,27 @@ class DatabaseHelper(context: Context) :
         cursor.close()
         db.close()
         return classes
+    }
+
+    fun getAllInstances(): List<ClassInstance> {
+        val instances = mutableListOf<ClassInstance>()
+        val db = readableDatabase
+        val cursor: Cursor = db.rawQuery("SELECT * FROM $TABLE_INSTANCES", null)
+        if (cursor.moveToFirst()) {
+            do {
+                val instance = ClassInstance(
+                    id = cursor.getInt(cursor.getColumnIndex(COLUMN_INSTANCE_ID)),
+                    classId = cursor.getInt(cursor.getColumnIndex(COLUMN_CLASS_ID)),
+                    date = cursor.getString(cursor.getColumnIndex(COLUMN_DATE)),
+                    teacher = cursor.getString(cursor.getColumnIndex(COLUMN_TEACHER)),
+                    comments = cursor.getString(cursor.getColumnIndex(COLUMN_COMMENTS))
+                )
+                instances.add(instance)
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return instances
     }
 
     fun getInstancesForClass(classId: Int): List<ClassInstance> {
@@ -138,10 +172,27 @@ class DatabaseHelper(context: Context) :
         return instances
     }
 
-
     fun deleteClass(id: Int) {
         val db = writableDatabase
         db.delete(TABLE_CLASSES, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
+    fun updateInstance(instance: ClassInstance) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_CLASS_ID, instance.classId)
+            put(COLUMN_DATE, instance.date)
+            put(COLUMN_TEACHER, instance.teacher)
+            put(COLUMN_COMMENTS, instance.comments)
+        }
+        db.update(TABLE_INSTANCES, values, "$COLUMN_INSTANCE_ID = ?", arrayOf(instance.id.toString()))
+        db.close()
+    }
+
+    fun deleteInstance(id: Int) {
+        val db = writableDatabase
+        db.delete(TABLE_INSTANCES, "$COLUMN_INSTANCE_ID = ?", arrayOf(id.toString()))
         db.close()
     }
 }

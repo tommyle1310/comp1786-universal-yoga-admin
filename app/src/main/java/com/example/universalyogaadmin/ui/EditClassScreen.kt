@@ -1,44 +1,34 @@
-package com.example.universalyogaadmin
+package com.example.universalyogaadmin.ui
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.universalyogaadmin.DatabaseHelper
 import com.example.universalyogaadmin.model.YogaClass
+import com.example.universalyogaadmin.R
 
-class AddClassActivity : ComponentActivity() {
-    private lateinit var dbHelper: DatabaseHelper
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        dbHelper = DatabaseHelper(this)
-        setContent {
-            AddClassScreen(modifier = Modifier, dbHelper = dbHelper) // Truyền cả modifier và dbHelper
-        }
-    }
-
-
-}
-
-public  @OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) { // Đặt modifier trước, dbHelper sau
-    var day by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
-    var capacity by remember { mutableStateOf("") }
-    var duration by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+fun EditClassScreen(
+    modifier: Modifier = Modifier,
+    dbHelper: DatabaseHelper,
+    yogaClass: YogaClass, // Lớp học cần chỉnh sửa
+    onSaveComplete: () -> Unit // Callback để quay lại sau khi lưu
+) {
+    // Khởi tạo state với dữ liệu từ yogaClass
+    var day by remember { mutableStateOf(yogaClass.day) }
+    var time by remember { mutableStateOf(yogaClass.time) }
+    var capacity by remember { mutableStateOf(yogaClass.capacity) }
+    var duration by remember { mutableStateOf(yogaClass.duration) }
+    var price by remember { mutableStateOf(yogaClass.price) }
+    var type by remember { mutableStateOf(yogaClass.type) }
+    var description by remember { mutableStateOf(yogaClass.description ?: "") }
 
     var isDayExpanded by remember { mutableStateOf(false) }
     var isTimeExpanded by remember { mutableStateOf(false) }
@@ -51,13 +41,49 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) { //
     val types = context.resources.getStringArray(R.array.class_types).toList()
     val durations = context.resources.getStringArray(R.array.durations).toList()
 
+    var showConfirmation by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    if (showConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showConfirmation = false },
+            title = { Text("Confirm Edited Class Details") },
+            text = {
+                Text(
+                    "Day: $day\nTime: $time\nCapacity: $capacity\nDuration: $duration\nPrice: $price\nType: $type\nDescription: $description"
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    val updatedClass = YogaClass(
+                        id = yogaClass.id, // Giữ nguyên ID
+                        day = day,
+                        time = time,
+                        capacity = capacity,
+                        duration = duration,
+                        price = price,
+                        type = type,
+                        description = description
+                    )
+                    dbHelper.updateClass(updatedClass) // Cập nhật vào DB
+                    Toast.makeText(context, "Class updated successfully", Toast.LENGTH_SHORT).show()
+                    showConfirmation = false
+                    onSaveComplete() // Quay lại sau khi lưu
+                }) { Text("Save") }
+            },
+            dismissButton = {
+                Button(onClick = { showConfirmation = false }) { Text("Edit More") }
+            }
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Add Yoga Class", style = MaterialTheme.typography.headlineMedium)
+        Text("Edit Yoga Class", style = MaterialTheme.typography.headlineMedium)
 
         ExposedDropdownMenuBox(
             expanded = isDayExpanded,
@@ -67,18 +93,13 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) { //
                 value = day,
                 onValueChange = { day = it },
                 label = { Text("Day of the Week") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),
+                modifier = Modifier.fillMaxWidth().menuAnchor(),
                 readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDayExpanded)
-                }
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDayExpanded) }
             )
             ExposedDropdownMenu(
                 expanded = isDayExpanded,
-                onDismissRequest = { isDayExpanded = false },
-                modifier = Modifier.exposedDropdownSize()
+                onDismissRequest = { isDayExpanded = false }
             ) {
                 days.forEach { dayOption ->
                     DropdownMenuItem(
@@ -100,18 +121,13 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) { //
                 value = time,
                 onValueChange = { time = it },
                 label = { Text("Time") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),
+                modifier = Modifier.fillMaxWidth().menuAnchor(),
                 readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isTimeExpanded)
-                }
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isTimeExpanded) }
             )
             ExposedDropdownMenu(
                 expanded = isTimeExpanded,
-                onDismissRequest = { isTimeExpanded = false },
-                modifier = Modifier.exposedDropdownSize()
+                onDismissRequest = { isTimeExpanded = false }
             ) {
                 times.forEach { timeOption ->
                     DropdownMenuItem(
@@ -133,18 +149,13 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) { //
                 value = type,
                 onValueChange = { type = it },
                 label = { Text("Type of Class") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),
+                modifier = Modifier.fillMaxWidth().menuAnchor(),
                 readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isTypeExpanded)
-                }
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isTypeExpanded) }
             )
             ExposedDropdownMenu(
                 expanded = isTypeExpanded,
-                onDismissRequest = { isTypeExpanded = false },
-                modifier = Modifier.exposedDropdownSize()
+                onDismissRequest = { isTypeExpanded = false }
             ) {
                 types.forEach { typeOption ->
                     DropdownMenuItem(
@@ -174,18 +185,13 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) { //
                 value = duration,
                 onValueChange = { duration = it },
                 label = { Text("Duration (minutes)") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),
+                modifier = Modifier.fillMaxWidth().menuAnchor(),
                 readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDurationExpanded)
-                }
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDurationExpanded) }
             )
             ExposedDropdownMenu(
                 expanded = isDurationExpanded,
-                onDismissRequest = { isDurationExpanded = false },
-                modifier = Modifier.exposedDropdownSize()
+                onDismissRequest = { isDurationExpanded = false }
             ) {
                 durations.forEach { durationOption ->
                     DropdownMenuItem(
@@ -214,27 +220,22 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) { //
             modifier = Modifier.fillMaxWidth()
         )
 
+        if (errorMessage.isNotEmpty()) {
+            Text(errorMessage, color = MaterialTheme.colorScheme.error)
+        }
+
         Button(
             onClick = {
                 if (day.isNotEmpty() && time.isNotEmpty() && capacity.isNotEmpty() && duration.isNotEmpty() && price.isNotEmpty() && type.isNotEmpty()) {
-                    val yogaClass = YogaClass(
-                        day = day,
-                        time = time,
-                        capacity = capacity,
-                        duration = duration,
-                        price = price,
-                        type = type,
-                        description = description
-                    )
-                    dbHelper.addClass(yogaClass)
-//                    finish() // Quay lại màn hình trước sau khi thêm
+                    errorMessage = ""
+                    showConfirmation = true
                 } else {
-                    Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_SHORT).show()
+                    errorMessage = "Please fill all required fields"
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Add Class", color = Color.White)
+            Text("Save Changes")
         }
     }
 }
