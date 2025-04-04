@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
             bottomBar = {
                 NavigationBar(
                     containerColor = Color(0xFF111111), // Nền gần đen
-                    contentColor = Color.White          // Màu mặc định cho icon/chữ
+                    contentColor = Color(0xFF58B427)          // Màu mặc định cho icon/chữ
                 ) {
                     NavigationBarItem(
                         icon = { Icon(Icons.Filled.Add, contentDescription = "Add Class") },
@@ -56,10 +56,11 @@ class MainActivity : ComponentActivity() {
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,      // Icon trắng tinh khi được chọn
-                            selectedTextColor = Color.White,      // Chữ trắng tinh khi được chọn
-                            unselectedIconColor = Color.Gray,     // Icon xám khi không chọn
-                            unselectedTextColor = Color.Gray      // Chữ xám khi không chọn
+                            selectedIconColor = Color.White,
+                            selectedTextColor = Color(0xFF58B427),
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color(0xFF58B427)
                         )
                     )
                     NavigationBarItem(
@@ -69,9 +70,10 @@ class MainActivity : ComponentActivity() {
                         onClick = { selectedTab = 1 },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color.White,
-                            selectedTextColor = Color.White,
+                            selectedTextColor = Color(0xFF58B427),
                             unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color(0xFF58B427)
                         )
                     )
                     NavigationBarItem(
@@ -81,9 +83,10 @@ class MainActivity : ComponentActivity() {
                         onClick = { selectedTab = 2 },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color.White,
-                            selectedTextColor = Color.White,
+                            selectedTextColor = Color(0xFF58B427),
                             unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color(0xFF58B427)
                         )
                     )
                 }
@@ -94,14 +97,19 @@ class MainActivity : ComponentActivity() {
                     AddClassScreen(modifier = Modifier.padding(innerPadding), dbHelper = dbHelper)
                 }
                 composable("class_list") {
-                    ClassListScreen(modifier = Modifier.padding(innerPadding), dbHelper = dbHelper, navController = navController)
+                    ClassListScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        dbHelper = dbHelper,
+                        navController = navController
+                    )
                 }
                 composable("search") {
                     SearchScreen(modifier = Modifier.padding(innerPadding), dbHelper = dbHelper)
                 }
                 composable("edit_class/{classId}") { backStackEntry ->
                     val classId = backStackEntry.arguments?.getString("classId")?.toIntOrNull() ?: 0
-                    val yogaClass = dbHelper.getAllClasses().find { it.id == classId } ?: return@composable
+                    val yogaClass =
+                        dbHelper.getAllClasses().find { it.id == classId } ?: return@composable
                     EditClassScreen(
                         modifier = Modifier.padding(innerPadding),
                         dbHelper = dbHelper,
@@ -119,8 +127,10 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 composable("edit_instance/{instanceId}") { backStackEntry ->
-                    val instanceId = backStackEntry.arguments?.getString("instanceId")?.toIntOrNull() ?: 0
-                    val instance = dbHelper.getAllInstances().find { it.id == instanceId } ?: return@composable
+                    val instanceId =
+                        backStackEntry.arguments?.getString("instanceId")?.toIntOrNull() ?: 0
+                    val instance =
+                        dbHelper.getAllInstances().find { it.id == instanceId } ?: return@composable
                     EditInstanceScreen(
                         modifier = Modifier.padding(innerPadding),
                         dbHelper = dbHelper,

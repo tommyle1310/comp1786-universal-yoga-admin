@@ -6,7 +6,9 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.universalyogaadmin.model.YogaClass
-import com.example.universalyogaadmin.model.ClassInstance // Thêm import này
+import com.example.universalyogaadmin.model.ClassInstance
+import java.text.SimpleDateFormat
+import java.util.*
 
 class DatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -78,14 +80,21 @@ class DatabaseHelper(context: Context) :
     }
 
     fun addInstance(classId: Int, date: String, teacher: String, comments: String?) {
-        val db = writableDatabase
-        val values = ContentValues()
-        values.put(COLUMN_CLASS_ID, classId)
-        values.put(COLUMN_DATE, date)
-        values.put(COLUMN_TEACHER, teacher)
-        values.put(COLUMN_COMMENTS, comments)
-        db.insert(TABLE_INSTANCES, null, values)
-        db.close()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        dateFormat.isLenient = false
+        try {
+            dateFormat.parse(date) // Kiểm tra định dạng ngày
+            val db = writableDatabase
+            val values = ContentValues()
+            values.put(COLUMN_CLASS_ID, classId)
+            values.put(COLUMN_DATE, date)
+            values.put(COLUMN_TEACHER, teacher)
+            values.put(COLUMN_COMMENTS, comments)
+            db.insert(TABLE_INSTANCES, null, values)
+            db.close()
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Date must be in dd/MM/yyyy format")
+        }
     }
 
     fun updateClass(yogaClass: YogaClass) {

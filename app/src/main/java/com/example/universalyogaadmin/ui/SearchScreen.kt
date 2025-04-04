@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.universalyogaadmin.DatabaseHelper
 import com.example.universalyogaadmin.model.ClassInstance
@@ -106,7 +107,10 @@ fun SearchScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) {
                         }
                     }
                 },
-                confirmButton = { Button(onClick = { selectedClass = null }) { Text("Close") } }
+                confirmButton = { Button(
+                    onClick = { selectedClass = null } ,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF58B427))
+                    ) { Text("Close") } }
             )
         }
 

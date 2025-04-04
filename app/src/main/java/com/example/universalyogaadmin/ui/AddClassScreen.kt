@@ -55,11 +55,25 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) {
             title = { Text("Confirm Class Details") },
             text = { Text("Day: $day\nTime: $time\nCapacity: $capacity\nDuration: $duration\nPrice: $price\nType: $type\nDescription: $description") },
             confirmButton = {
-                Button(onClick = {
-                    dbHelper.addClass(YogaClass(day = day, time = time, capacity = capacity, duration = duration, price = price, type = type, description = description))
-                    showConfirmation = false
-                    day = ""; time = ""; capacity = ""; duration = ""; price = ""; type = ""; description = ""
-                }) { Text("Save") }
+                Button(
+                    onClick = {
+                        dbHelper.addClass(
+                            YogaClass(
+                                day = day,
+                                time = time,
+                                capacity = capacity,
+                                duration = duration,
+                                price = price,
+                                type = type,
+                                description = description
+                            )
+                        )
+                        showConfirmation = false
+                        day = ""; time = ""; capacity = ""; duration = ""; price = ""; type =
+                        ""; description = ""
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF58B427))
+                ) { Text("Save") }
             },
             dismissButton = { Button(onClick = { showConfirmation = false }) { Text("Edit") } }
         )
@@ -74,50 +88,74 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) {
     ) {
         Text("Add Yoga Class", style = MaterialTheme.typography.headlineMedium)
 
-        ExposedDropdownMenuBox(expanded = isDayExpanded, onExpandedChange = { isDayExpanded = !isDayExpanded }) {
+        ExposedDropdownMenuBox(
+            expanded = isDayExpanded,
+            onExpandedChange = { isDayExpanded = !isDayExpanded }) {
             OutlinedTextField(
                 value = day,
                 onValueChange = { day = it },
                 label = { Text("Day of the Week") },
-                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDayExpanded) }
             )
-            ExposedDropdownMenu(expanded = isDayExpanded, onDismissRequest = { isDayExpanded = false }) {
+            ExposedDropdownMenu(
+                expanded = isDayExpanded,
+                onDismissRequest = { isDayExpanded = false }) {
                 days.forEach { dayOption ->
-                    DropdownMenuItem(text = { Text(dayOption) }, onClick = { day = dayOption; isDayExpanded = false })
+                    DropdownMenuItem(
+                        text = { Text(dayOption) },
+                        onClick = { day = dayOption; isDayExpanded = false })
                 }
             }
         }
 
-        ExposedDropdownMenuBox(expanded = isTimeExpanded, onExpandedChange = { isTimeExpanded = !isTimeExpanded }) {
+        ExposedDropdownMenuBox(
+            expanded = isTimeExpanded,
+            onExpandedChange = { isTimeExpanded = !isTimeExpanded }) {
             OutlinedTextField(
                 value = time,
                 onValueChange = { time = it },
                 label = { Text("Time") },
-                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isTimeExpanded) }
             )
-            ExposedDropdownMenu(expanded = isTimeExpanded, onDismissRequest = { isTimeExpanded = false }) {
+            ExposedDropdownMenu(
+                expanded = isTimeExpanded,
+                onDismissRequest = { isTimeExpanded = false }) {
                 times.forEach { timeOption ->
-                    DropdownMenuItem(text = { Text(timeOption) }, onClick = { time = timeOption; isTimeExpanded = false })
+                    DropdownMenuItem(
+                        text = { Text(timeOption) },
+                        onClick = { time = timeOption; isTimeExpanded = false })
                 }
             }
         }
 
-        ExposedDropdownMenuBox(expanded = isTypeExpanded, onExpandedChange = { isTypeExpanded = !isTypeExpanded }) {
+        ExposedDropdownMenuBox(
+            expanded = isTypeExpanded,
+            onExpandedChange = { isTypeExpanded = !isTypeExpanded }) {
             OutlinedTextField(
                 value = type,
                 onValueChange = { type = it },
                 label = { Text("Type of Class") },
-                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isTypeExpanded) }
             )
-            ExposedDropdownMenu(expanded = isTypeExpanded, onDismissRequest = { isTypeExpanded = false }) {
+            ExposedDropdownMenu(
+                expanded = isTypeExpanded,
+                onDismissRequest = { isTypeExpanded = false }) {
                 types.forEach { typeOption ->
-                    DropdownMenuItem(text = { Text(typeOption) }, onClick = { type = typeOption; isTypeExpanded = false })
+                    DropdownMenuItem(
+                        text = { Text(typeOption) },
+                        onClick = { type = typeOption; isTypeExpanded = false })
                 }
             }
         }
@@ -130,16 +168,22 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
-        ExposedDropdownMenuBox(expanded = isDurationExpanded, onExpandedChange = { isDurationExpanded = !isDurationExpanded }) {
+        ExposedDropdownMenuBox(
+            expanded = isDurationExpanded,
+            onExpandedChange = { isDurationExpanded = !isDurationExpanded }) {
             OutlinedTextField(
                 value = duration,
                 onValueChange = { duration = it },
                 label = { Text("Duration (minutes)") },
-                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDurationExpanded) }
             )
-            ExposedDropdownMenu(expanded = isDurationExpanded, onDismissRequest = { isDurationExpanded = false }) {
+            ExposedDropdownMenu(
+                expanded = isDurationExpanded,
+                onDismissRequest = { isDurationExpanded = false }) {
                 durations.forEach { durationOption ->
                     DropdownMenuItem(
                         text = { Text("$durationOption minutes") },
@@ -169,9 +213,11 @@ fun AddClassScreen(modifier: Modifier = Modifier, dbHelper: DatabaseHelper) {
                 if (locationPermissionState.status.isGranted) {
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                         if (location != null) {
-                            description = "Location: ${location.latitude}, ${location.longitude}\n$description"
+                            description =
+                                "Location: ${location.latitude}, ${location.longitude}\n$description"
                         }
-                        Toast.makeText(context, "Location added to description", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Location added to description", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } else {
                     locationPermissionState.launchPermissionRequest()
